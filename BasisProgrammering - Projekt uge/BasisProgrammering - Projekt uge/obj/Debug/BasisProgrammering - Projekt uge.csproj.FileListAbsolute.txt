@@ -1,0 +1,8 @@
+C:\Users\micha\OneDrive\Dokumenter\GitHub\Basisprogrammering-Projekt-uge\BasisProgrammering - Projekt uge\BasisProgrammering - Projekt uge\bin\Debug\BasisProgrammering - Projekt uge.exe.config
+C:\Users\micha\OneDrive\Dokumenter\GitHub\Basisprogrammering-Projekt-uge\BasisProgrammering - Projekt uge\BasisProgrammering - Projekt uge\bin\Debug\BasisProgrammering - Projekt uge.exe
+C:\Users\micha\OneDrive\Dokumenter\GitHub\Basisprogrammering-Projekt-uge\BasisProgrammering - Projekt uge\BasisProgrammering - Projekt uge\bin\Debug\BasisProgrammering - Projekt uge.pdb
+C:\Users\micha\OneDrive\Dokumenter\GitHub\Basisprogrammering-Projekt-uge\BasisProgrammering - Projekt uge\BasisProgrammering - Projekt uge\obj\Debug\BasisProgrammering - Projekt uge.csproj.AssemblyReference.cache
+C:\Users\micha\OneDrive\Dokumenter\GitHub\Basisprogrammering-Projekt-uge\BasisProgrammering - Projekt uge\BasisProgrammering - Projekt uge\obj\Debug\BasisProgrammering - Projekt uge.csproj.SuggestedBindingRedirects.cache
+C:\Users\micha\OneDrive\Dokumenter\GitHub\Basisprogrammering-Projekt-uge\BasisProgrammering - Projekt uge\BasisProgrammering - Projekt uge\obj\Debug\BasisProgrammering - Projekt uge.csproj.CoreCompileInputs.cache
+C:\Users\micha\OneDrive\Dokumenter\GitHub\Basisprogrammering-Projekt-uge\BasisProgrammering - Projekt uge\BasisProgrammering - Projekt uge\obj\Debug\BasisProgrammering - Projekt uge.exe
+C:\Users\micha\OneDrive\Dokumenter\GitHub\Basisprogrammering-Projekt-uge\BasisProgrammering - Projekt uge\BasisProgrammering - Projekt uge\obj\Debug\BasisProgrammering - Projekt uge.pdb

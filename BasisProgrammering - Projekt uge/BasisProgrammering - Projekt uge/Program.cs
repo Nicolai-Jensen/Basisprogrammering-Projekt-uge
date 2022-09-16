@@ -11,15 +11,42 @@ namespace BasisProgrammering___Projekt_uge
         static void Main(string[] args)
         {
 
-            // TODO: make a menu for the games 
 
-            MineSweeper(); 
+            
 
-            Console.ReadLine(); 
+            //Main is where our start menu is located
+
+            Console.WriteLine("Welcome to our Main Menu");
+            Console.WriteLine("Choose a game \n");
+
+            Console.WriteLine("1. MineSweeper");
+            Console.WriteLine("2. Chess");
+            Console.WriteLine("3. BattleShip");
+            int input = int.Parse(Console.ReadLine());
+            Console.Clear();
+
+            if (input == 1)
+            {
+                MineSweeper();
+            }
+
+            else if (input == 2)
+            {
+                Chess();
+            }
+
+            else if (input == 3)
+            {
+                BattleShip();
+            }
+
+            Console.ReadLine();
+
         }
 
         static void MineSweeper()
         {
+
             // promt user for board size 
             Console.WriteLine("How big should the board be?");
             int boardHeight = Convert.ToInt32(Console.ReadLine());
@@ -33,6 +60,19 @@ namespace BasisProgrammering___Projekt_uge
             int numberOfBombs = Convert.ToInt32(Console.ReadLine());
 
             DrawBoardMS(board, numberOfBombs); 
+
+
+        }
+
+        static void Chess()
+        {
+
+        }
+
+        static void BattleShip()
+        {
+
+
         }
 
         static void DrawBoardMS(int[,] board, int numberOfBombs)
