@@ -10,6 +10,20 @@ namespace BasisProgrammering___Projekt_uge
     {
         static void Main(string[] args)
         {
+
+            // TODO: make a menu for the games 
+
+            
         }
+
+        static void MineSweeper()
+        {
+
+        }
+
+
+
+
+
     }
 }
