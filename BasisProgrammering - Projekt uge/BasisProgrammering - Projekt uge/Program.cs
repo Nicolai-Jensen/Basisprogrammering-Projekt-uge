@@ -59,10 +59,35 @@ namespace BasisProgrammering___Projekt_uge
             Console.WriteLine("How many bombs? \n\tMin: 0 \n\tMax: {0}", boardHeight*boardWidth);
             int numberOfBombs = Convert.ToInt32(Console.ReadLine());
 
-            DrawBoardMS(board, numberOfBombs); 
+            SetBombsMS(board, numberOfBombs); 
 
 
         }
+
+        static void SetBombsMS(int[,] board, int numberOfBombs)
+        {
+            // set the bombs on the board 
+            while (numberOfBombs > 0)
+            {
+                for (int i = 0; i < board.GetLength(0); i++)
+                {
+                    for (int j = 0; j < board.GetLength(1); j++)
+                    {
+                        // set bomb randomly on board 
+                        Random random = new Random();
+                        if (board[i,j] == 0 && random.Next(1) == 1)
+                        {
+                            board[i, j] = 35; // ascii: 35 = # 
+                            numberOfBombs--; 
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+
 
         static void Chess()
         {
@@ -75,22 +100,7 @@ namespace BasisProgrammering___Projekt_uge
 
         }
 
-        static void DrawBoardMS(int[,] board, int numberOfBombs)
-        {
-
-            for (int i = 0; i < board.GetLength(0); i++)
-            {
-                for (int j = 0; j < board.GetLength(1); j++)
-                {
-
-                }
-
-            }
-
-
-
-
-        }
+        
 
 
 
