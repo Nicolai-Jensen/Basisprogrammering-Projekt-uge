@@ -40,7 +40,7 @@ namespace BasisProgrammering___Projekt_uge
                 else if (c == '2')
                 {
                     Console.Clear();
-                    BattleShip();
+                    //BattleShip();
                     Console.Clear();
                 }
                 else if (c == '3')
@@ -54,6 +54,7 @@ namespace BasisProgrammering___Projekt_uge
                 //ask player for input again if the previous input was not allowed
             } while (isAllowedInput);
         }
+
 
         /// <summary>
         /// MineSweeper 
@@ -390,7 +391,7 @@ namespace BasisProgrammering___Projekt_uge
             else
             {
                 // uncover recursively using neighbours 
-                UncoverRecursive(posX, posY);
+                UncoverNext(posX, posY);
 
                 // return that the game should go on 
                 return true;
@@ -403,7 +404,7 @@ namespace BasisProgrammering___Projekt_uge
         /// </summary>
         /// <param name="posX">the x position to check neighbours from</param>
         /// <param name="posY">the y position to check neighbours from</param>
-        static void UncoverRecursive(int posX, int posY)
+        static void UncoverNext(int posX, int posY)
         {
             // set this position to be uncovered 
             isRevealedBoardMS[posX, posY] = true;
@@ -431,7 +432,7 @@ namespace BasisProgrammering___Projekt_uge
                         isRevealedBoardMS[x, y] = true;
 
                         // uncover the neighbour neighbours 
-                        UncoverRecursive(x, y);
+                        UncoverNext(x, y);
                     }
                 }
             }
@@ -446,10 +447,10 @@ namespace BasisProgrammering___Projekt_uge
         /// <returns>multidimentional array of the given positions neighbours</returns>
         static int[,] GetNeighboursOfPoint(int x, int y)
         {
-            int arraySize = 0;
-            int[,] neighbours = new int[arraySize, 2];
+            // set neighbours to be empty at the start
+            int[,] neighbours = new int[0, 2];
 
-
+            // loop i and j from -1 to 1, as what needs to be added to the current position 
             for (int i = -1; i <= 1; i++)
             {
                 for (int j = -1; j <= 1; j++)
@@ -459,17 +460,16 @@ namespace BasisProgrammering___Projekt_uge
                         // do not add itself 
                         continue;
                     }
+                    // check if position {x+i, y+j} is on the board 
                     if (IsOnBoard(x + i, y + j))
                     {
+                        // add the position as a valid neighbour to the array 
                         neighbours = AddItemToArray(x + i, y + j, neighbours);
-
-
                     }
-
                 }
             }
 
-
+            // return the array of neighbours 
             return neighbours;
         }
 
