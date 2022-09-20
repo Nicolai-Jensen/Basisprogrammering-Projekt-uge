@@ -129,56 +129,14 @@ namespace BasisProgrammering___Projekt_uge
         /// </summary>
         static void InitializeBoard()
         {
-            // TODO: make sure player can not put ENTER as the input 
-
             // promt player for board size 
             Console.WriteLine("How big should the board be?");
-            string sWidth = "";
-            string sHeight = "";
-
-            // getting the width of the board: 
-            // boolean to check if player input is allowed 
-            bool isAllowedInput = true;
-            do
-            {
-                // promt player for width input 
-                Console.Write("Width: \t\t");
-                sWidth = Console.ReadLine();
-                // check if player input is a string that can be converted to an integer, and input is non-negative 
-                if (sWidth.All(char.IsDigit) && Convert.ToInt32(sWidth) >= 0)
-                {
-                    isAllowedInput = false;
-                }
-                else
-                {
-                    // if input is not allowed
-                    Console.WriteLine("Input is not allowed, try again.");
-                    Console.ReadLine();
-                }
-                //ask player for input again if the previous input was not allowed
-            } while (isAllowedInput);
-
-            // getting the height of the board: 
-            // boolean to check if player input is allowed 
-            isAllowedInput = true;
-            do
-            {
-                // promt the player for height input 
-                Console.Write("Height: \t");
-                sHeight = Console.ReadLine();
-                // check if player input is a string that can be converted to an integer, and input is non-negative 
-                if (sHeight.All(char.IsDigit) && Convert.ToInt32(sHeight) >= 0)
-                {
-                    isAllowedInput = false;
-                }
-                else
-                {
-                    // if input is not allowed  
-                    Console.WriteLine("Input is not allowed, try again.");
-                    Console.ReadLine();
-                }
-                //ask player for input again if the previous input was not allowed
-            } while (isAllowedInput);
+            // promt player for width input 
+            Console.Write("Width: \t\t");
+            string sWidth = ReadInputNumber();
+            // promt the player for height input 
+            Console.Write("Height: \t");
+            string sHeight = ReadInputNumber();
 
             // set the width and height of the board 
             int boardWidth = Convert.ToInt32(sWidth);
@@ -187,28 +145,9 @@ namespace BasisProgrammering___Projekt_uge
             // set board size with player input 
             boardMS = new int[boardWidth, boardHeight];
 
-            // getting the total amount of bombs on the board: 
-            string sBombs = "";
-            isAllowedInput = true;
-            do
-            {
-                // promt player for how many bombs should be on the board 
-                Console.WriteLine("How many bombs? \n\tMin: 0 \n\tMax: {0}", boardWidth * boardHeight);
-                sBombs = Console.ReadLine();
-                // check if player input is a string that can be converted to an integer, and input is non-negative or not above max 
-                if (sBombs.All(char.IsDigit) && Convert.ToInt32(sBombs) >= 0 && Convert.ToInt32(sBombs) <= boardWidth * boardHeight)
-                {
-                    isAllowedInput = false;
-                }
-                else
-                {
-                    // if input is not allowed 
-                    Console.WriteLine("Input is not allowed, try again.");
-                    Console.ReadLine();
-                    isAllowedInput = true;
-                }
-                //ask player for input again if the previous input was not allowed
-            } while (isAllowedInput);
+            // promt player for how many bombs should be on the board 
+            Console.WriteLine("How many bombs? \n\tMin: 0 \n\tMax: {0}", boardWidth * boardHeight);
+            string sBombs = ReadInputNumberBombs();
 
             // set the number of total bombs 
             numberOfBombs = Convert.ToInt32(sBombs);
@@ -226,9 +165,12 @@ namespace BasisProgrammering___Projekt_uge
         /// </summary>
         static void PlaceBombs()
         {
-            // TODO: maybe make better random placement of bombs 
             // make the object random using the Random class 
             Random random = new Random();
+
+            // initialize position variables 
+            int posX;
+            int posY;
 
             // the remaining bombs that should be placed 
             int remainingBombs = numberOfBombs;
@@ -236,22 +178,18 @@ namespace BasisProgrammering___Projekt_uge
             // as long as there are still bombs to be placed, run the loop 
             while (remainingBombs > 0)
             {
-                // set all the bombs on the board 
-                for (int j = 0; j < boardMS.GetLength(1); j++)
-                {
-                    for (int i = 0; i < boardMS.GetLength(0); i++)
-                    {
-                        // only set bomb on position if there is no bomb present 
-                        // only set if allowed by random 
-                        if (remainingBombs != 0 && boardMS[i, j] == 0 && random.Next(boardMS.GetLength(0) * boardMS.GetLength(1)) == 1)
-                        {
-                            // mark the bomb on the board 
-                            boardMS[i, j] = 35; // ascii: 35 = # 
+                // get random x and y positions 
+                posX = random.Next(boardMS.GetLength(0) - 1);
+                posY = random.Next(boardMS.GetLength(1) - 1);
 
-                            // decrease amount of bombs remaining 
-                            remainingBombs--;
-                        }
-                    }
+                // check if the position on the board has a bomb 
+                if (boardMS[posX, posY] == 0)
+                {
+                    // set a bomb on the random position on the board 
+                    boardMS[posX, posY] = 35; // ascii: 35 = # 
+
+                    // decrease amount of bombs remaining 
+                    remainingBombs--;
                 }
             }
         }
@@ -271,7 +209,7 @@ namespace BasisProgrammering___Projekt_uge
                     if (boardMS[i, j] == 35)
                     {
                         // find the neighbours of the bomb 
-                        int[,] neighbours = GetNeighbours(i, j);
+                        int[,] neighbours = GetNeighboursOfPoint(i, j);
 
                         // count bombs at each neighbour 
                         for (int k = 0; k < neighbours.GetLength(0); k++)
@@ -415,98 +353,48 @@ namespace BasisProgrammering___Projekt_uge
         /// <returns>returns a boolean, used to tell if player is alive/hit a bomb</returns>
         static bool Uncover()
         {
-            // boolean to check if index is inside the bounds 
-            bool isIndexSizeAllowed = true;
-            do
+            // promt player to uncover at position 
+            Console.WriteLine("Uncover at position: ");
+            // promt player for horizontal position input 
+            Console.Write("Horizontal: \t");
+            string sHorizontal = ReadInputForHorizontal();
+            // promt player for vertical position input 
+            Console.Write("Vertical: \t");
+            string sVertical = ReadInputForVertical();
+
+            // set the positions 
+            // convert characters in string to int 
+            int posX = Convert.ToInt32(sHorizontal[0]) - 97 + (Convert.ToInt32(sHorizontal[1]) - 48) * 26;
+            int posY = Convert.ToInt32(sVertical) - 1;
+
+            // check if position on board has a bomb 
+            if (boardMS[posX, posY] == 35)
             {
-                // promt player to uncover at position 
-                Console.WriteLine("Uncover at position: ");
-                string sHorizontal = "";
-                string sVertical = "";
-
-                // getting the horizontal position: 
-                // boolean to check if player input is allowed 
-                bool isAllowed = true;
-                do
+                // if player hits a bomb, reveal the entire board 
+                // update the boardShow to reveal the board 
+                for (int j = 0; j < isRevealedBoardMS.GetLength(1); j++)
                 {
-                    // promt player for horizontal position input 
-                    Console.Write("Horizontal: \t");
-                    sHorizontal = Console.ReadLine() + "0";
-                    // check if player input is a string with a letter in first position and integer at the second position 
-                    if (Char.IsLetter(sHorizontal, 0) && Char.IsDigit(sHorizontal, 1))
+                    for (int i = 0; i < isRevealedBoardMS.GetLength(0); i++)
                     {
-                        isAllowed = false;
-                    }
-                    //ask player for input again if the previous input was not allowed
-                } while (isAllowed);
+                        // set position to true, hence uncovered 
+                        isRevealedBoardMS[i, j] = true;
 
-                // getting the horizontal position: 
-                // boolean to check if player input is allowed 
-                isAllowed = true;
-                do
-                {
-                    // promt player for vertical position input 
-                    Console.Write("Vertical: \t");
-                    sVertical = Console.ReadLine();
-                    // check if player input is a string that can be converted to an integer
-                    if (sVertical.All(char.IsDigit))
-                    {
-                        isAllowed = false;
-                    }
-                    //ask player for input again if the previous input was not allowed
-                } while (isAllowed);
-
-                // set the positions 
-                // convert characters in string to int 
-                int posX = Convert.ToInt32(sHorizontal[0]) - 97 + (Convert.ToInt32(sHorizontal[1]) - 48) * 26;
-                int posY = Convert.ToInt32(sVertical) - 1;
-
-                // check if player input is inside the bounds of the board 
-                if (posX < 0 || posX > boardMS.GetLength(0) - 1 || posY < 0 || posY > boardMS.GetLength(1) - 1)
-                {
-                    Console.WriteLine("Position is not on the board, try again.");
-                    Console.ReadLine();
-                    Console.Clear();
-                    DrawBoard();
-                }
-                else
-                {
-                    // input is allowed in all aspects 
-                    isIndexSizeAllowed = false;
-
-                    // check if position on board has a bomb 
-                    if (boardMS[posX, posY] == 35)
-                    {
-                        // if player hits a bomb, reveal the entire board 
-                        // update the boardShow to reveal the board 
-                        for (int j = 0; j < isRevealedBoardMS.GetLength(1); j++)
-                        {
-                            for (int i = 0; i < isRevealedBoardMS.GetLength(0); i++)
-                            {
-                                // set position to true, hence uncovered 
-                                isRevealedBoardMS[i, j] = true;
-
-                                // count down uncovered positions 
-                                numberOfUncoveredPositions--;
-                            }
-                        }
-
-                        // return that the player is dead 
-                        return false;
-                    }
-                    else
-                    {
-                        // uncover recursively using neighbours 
-                        UncoverRecursive(posX, posY);
-
-                        // return that the game should go on 
-                        return true;
+                        // count down uncovered positions 
+                        numberOfUncoveredPositions--;
                     }
                 }
-                //ask player for input again if the previous input was not allowed
-            } while (isIndexSizeAllowed);
-            // return true, to make sure all routes has a return TODO 
-            return true;
+
+                // return that the player is dead 
+                return false;
+            }
+            else
+            {
+                // uncover recursively using neighbours 
+                UncoverRecursive(posX, posY);
+
+                // return that the game should go on 
+                return true;
+            }
         }
 
         /// <summary>
@@ -527,7 +415,7 @@ namespace BasisProgrammering___Projekt_uge
             if (boardMS[posX, posY] == 0)
             {
                 // get the neighbours for this position 
-                int[,] neighbours = GetNeighbours(posX, posY);
+                int[,] neighbours = GetNeighboursOfPoint(posX, posY);
 
                 // for every neighbour, 
                 for (int i = 0; i < neighbours.GetLength(0); i++)
@@ -549,156 +437,212 @@ namespace BasisProgrammering___Projekt_uge
             }
         }
 
-
-        // TODO: make better, less if-statements --> make smarter 
         /// <summary>
         /// MineSweeper 
-        /// function for getting the neighbours of a certain position on the board 
+        /// function for getting the neighbours of a given position on the board 
         /// </summary>
         /// <param name="x">the x position on the board</param>
         /// <param name="y">the y position on the board</param>
         /// <returns>multidimentional array of the given positions neighbours</returns>
-        static int[,] GetNeighbours(int x, int y)
+        static int[,] GetNeighboursOfPoint(int x, int y)
         {
-            // set max values 
-            int xMax = boardMS.GetLength(0) - 1;
-            int yMax = boardMS.GetLength(1) - 1;
+            int arraySize = 0;
+            int[,] neighbours = new int[arraySize, 2];
 
-            // corner cases 
-            if (x == 0 && y == 0)
+
+            for (int i = -1; i <= 1; i++)
             {
-                // upper left corner 
-                int[,] neighbours = { { x + 1, y }, { x, y + 1 }, { x + 1, y + 1 } };
-                return neighbours;
+                for (int j = -1; j <= 1; j++)
+                {
+                    if (i == 0 && j == 0)
+                    {
+                        // do not add itself 
+                        continue;
+                    }
+                    if (IsOnBoard(x + i, y + j))
+                    {
+                        neighbours = AddItemToArray(x + i, y + j, neighbours);
+
+
+                    }
+
+                }
             }
-            else if (x == xMax && y == 0)
+
+
+            return neighbours;
+        }
+
+        /// <summary>
+        /// MineSweeper 
+        /// function to check if given position is on the board 
+        /// </summary>
+        /// <param name="x">the x position</param>
+        /// <param name="y">the y position</param>
+        /// <returns>returns a boolean to see if statement is true or false</returns>
+        static bool IsOnBoard(int x, int y)
+        {
+            return x >= 0 && y >= 0 && x < boardMS.GetLength(0) && y < boardMS.GetLength(1);
+        }
+
+        /// <summary>
+        /// MineSweeper 
+        /// function that adds an item to an array 
+        /// </summary>
+        /// <param name="x">the x position</param>
+        /// <param name="y">the y position</param>
+        /// <param name="arr">the given array that should be added to</param>
+        /// <returns>returns the array with the given element {x,y}</returns>
+        static int[,] AddItemToArray(int x, int y, int[,] arr)
+        {
+            // make new array, and increase size 
+            int[,] newArr = new int[arr.GetLength(0) + 1, 2];
+
+            // get all from old array into new array 
+            for (int i = 0; i < arr.GetLength(0); i++)
             {
-                // upper right corner 
-                int[,] neighbours = { { x - 1, y }, { x - 1, y + 1 }, { x, y + 1 } };
-                return neighbours;
+                // x position 
+                newArr[i, 0] = arr[i, 0];
+                // y position 
+                newArr[i, 1] = arr[i, 1];
             }
-            else if (x == 0 && y == yMax)
+            // set the last element into new array 
+            newArr[newArr.GetLength(0) - 1, 0] = x;
+            newArr[newArr.GetLength(0) - 1, 1] = y;
+
+            // return the new array 
+            return newArr;
+        }
+
+        /// <summary>
+        /// MineSweeper
+        /// function that ensures valid number input from the player 
+        /// </summary>
+        /// <returns>returns the valid input</returns>
+        static string ReadInputNumber()
+        {
+            // get player input 
+            string input = Console.ReadLine();
+
+            // check if input is empty, and is a valid number 
+            if (input.Equals("") || input.Contains(" ") || !input.All(char.IsDigit))
             {
-                // lower left corner 
-                int[,] neighbours = { { x, y - 1 }, { x + 1, y - 1 }, { x + 1, y } };
-                return neighbours;
+                Console.WriteLine("Please enter valid input.");
+                // call function again 
+                return ReadInputNumber();
             }
-            else if (x == xMax && y == yMax)
-            {
-                // lower right corner 
-                int[,] neighbours = { { x - 1, y - 1 }, { x, y - 1 }, { x - 1, y } };
-                return neighbours;
-            }
-            // edge cases 
-            else if (y == 0)
-            {
-                // top edge 
-                int[,] neighbours = { { x - 1, y }, { x + 1, y }, { x - 1, y + 1 }, { x, y + 1 }, { x + 1, y + 1 } };
-                return neighbours;
-            }
-            else if (y == yMax)
-            {
-                // bottom edge 
-                int[,] neighbours = { { x - 1, y - 1 }, { x, y - 1 }, { x + 1, y - 1 }, { x - 1, y }, { x + 1, y } };
-                return neighbours;
-            }
-            else if (x == 0)
-            {
-                // left edge 
-                int[,] neighbours = { { x, y - 1 }, { x + 1, y - 1 }, { x + 1, y }, { x, y + 1 }, { x + 1, y + 1 } };
-                return neighbours;
-            }
-            else if (x == xMax)
-            {
-                // right edge 
-                int[,] neighbours = { { x - 1, y - 1 }, { x, y - 1 }, { x - 1, y }, { x - 1, y + 1 }, { x, y + 1 } };
-                return neighbours;
-            }
-            // everywhere else 
             else
             {
-                int[,] neighbours = { { x - 1, y - 1 }, { x, y - 1 }, { x + 1, y - 1 }, { x - 1, y }, { x + 1, y }, { x - 1, y + 1 }, { x, y + 1 }, { x + 1, y + 1 } };
-                return neighbours;
+                // check if input is greater than zero 
+                if (Convert.ToInt32(input) < 0)
+                {
+                    Console.WriteLine("Please enter non-negative input.");
+                    // call function again 
+                    return ReadInputNumber();
+                }
+
+                // return valid input 
+                return input;
             }
         }
 
         /// <summary>
-        /// This is the BattleShip game, mainly the resposibility of Nicolai in the group.
+        /// MineSweeper
+        /// function that ensures valid number of bombs input from the player 
         /// </summary>
-        static void BattleShip()
+        /// <returns>returns the valid input</returns>
+        static string ReadInputNumberBombs()
         {
-            Console.WriteLine("BattleShip \n");
+            // get player input 
+            string input = Console.ReadLine();
 
+            // check if input is empty, and is a valid number 
+            if (input.Equals("") || input.Contains(" ") || !input.All(char.IsDigit))
+            {
+                Console.WriteLine("Please enter valid input.");
+                // call function again 
+                return ReadInputNumberBombs();
+            }
+            else
+            {
+                if (Convert.ToInt32(input) < 0 || Convert.ToInt32(input) > boardMS.GetLength(0) * boardMS.GetLength(1))
+                {
+                    Console.WriteLine("Please enter an amount of bombs a specified.");
+                    // call function again 
+                    return ReadInputNumberBombs();
+                }
 
-            int[,] battleshipBoard1 = new int[10, 10];
-
-            int[,] battleshipBoard2 = new int[10, 10];
-
-
-
-            //This for loop draws out both Arrays along the x and y axis which are labeled i and j in the code
-            //The i is used only once as it indicates each Line downwards, meanwhile the j is used twice both boards need to be next to each other horizontally
-            BattleShipBoardcall(battleshipBoard1, battleshipBoard2);
-
-
-            Random random = new Random();
-            int row = random.Next(battleshipBoard1.GetLength(0));
-            int column = random.Next(battleshipBoard1.GetLength(1));
-
-            int randomShip = battleshipBoard1[row, column];
-
-            battleshipBoard1[row, column] = (int)Ship.Ship;
-
-            Console.WriteLine();
-            Console.ReadLine();
-            Console.Clear();
-            Console.WriteLine("BattleShip \n");
-
-            BattleShipBoardcall(battleshipBoard1, battleshipBoard2);
-            Console.ReadLine();
+                // return valid input 
+                return input;
+            }
         }
 
-
-
-        static void BattleShipBoardcall(int[,] battleshipBoard1, int[,] battleshipBoard2)
+        /// <summary>
+        /// MineSweeper 
+        /// function that ensures valid input for horizontal position from player
+        /// </summary>
+        /// <returns>returns the valid input</returns>
+        static string ReadInputForHorizontal()
         {
-            //This for loop draws out both Arrays along the x and y axis which are labeled i and j in the code
-            //The i is used only once as it indicates each Line downwards, meanwhile the j is used twice both boards need to be next to each other horizontally
+            // get player input 
+            string input = Console.ReadLine() + "0";
 
-            for (int i = 0; i < battleshipBoard1.GetLength(0); i++)
+            // check if input is empty, has a letter followed by a number, and is inside the bounds 
+            if (input.Equals("") || input.Contains(" ") || input.Length < 2 || !Char.IsLetter(input[0]) || !Char.IsDigit(input[1]))
             {
-                for (int j = 0; j < battleshipBoard1.GetLength(1); j++)
-                {
-                    Console.Write(battleshipBoard1[i, j] + "  ");
-                }
-                Console.Write("\t \t");
-
-                for (int j = 0; j < battleshipBoard2.GetLength(0); j++)
-                {
-                    Console.Write(battleshipBoard2[i, j] + "  ");
-                }
-                Console.WriteLine();
+                Console.WriteLine("Please enter valid input.");
+                // call function again 
+                return ReadInputForHorizontal();
             }
+            else
+            {
+                // convert characters in string to int - using ascii 
+                int posX = Convert.ToInt32(input[0]) - 97 + (Convert.ToInt32(input[1]) - 48) * 26;
 
+                // check if inside the bounds of the board 
+                if (posX < 0 || posX > boardMS.GetLength(0) - 1)
+                {
+                    Console.WriteLine("Please enter a position inside the board.");
+                    // call function again 
+                    return ReadInputForHorizontal();
+                }
 
-
+                // return valid input 
+                return input;
+            }
         }
 
-        static void DrawBoardMS(int[,] board, int numberOfBombs)
+        /// <summary>
+        /// MineSweeper 
+        /// function that ensures valid input for vertical position from player 
+        /// </summary>
+        /// <returns>returns valid input</returns>
+        static string ReadInputForVertical()
         {
+            // get player input 
+            string input = Console.ReadLine();
 
-            for (int i = 0; i < board.GetLength(0); i++)
+            // check if input is empty, and is a valid number 
+            if (input.Equals("") || input.Contains(" ") || !input.All(char.IsDigit))
             {
-                for (int j = 0; j < board.GetLength(1); j++)
+                Console.WriteLine("Please enter valid input.");
+                // call function again 
+                return ReadInputForVertical();
+            }
+            else
+            {
+                // check if inside the bounds of the board 
+                int posY = Convert.ToInt32(input) - 1;
+                if (posY < 0 || posY > boardMS.GetLength(1) - 1)
                 {
-
+                    Console.WriteLine("Please enter a position inside the board.");
+                    // call function again 
+                    return ReadInputForVertical();
                 }
 
+                // return valid input 
+                return input;
             }
-
-
-
-
         }
     }
 }
