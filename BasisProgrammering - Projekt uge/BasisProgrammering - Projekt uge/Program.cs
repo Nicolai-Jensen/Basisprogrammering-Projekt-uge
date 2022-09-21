@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BasisProgrammering___Projekt_uge
 {
@@ -13,8 +10,10 @@ namespace BasisProgrammering___Projekt_uge
         // field variables for MineSweeper 
         static int[,] boardMS;
         static bool[,] isRevealedBoardMS;
+        static bool[,] isMarkedAsBomb;
         static int numberOfBombs;
-        static int numberOfUncoveredPositions;
+        static int numberOfCoveredPositions;
+        static int numberOfMarkedPositions;
 
 
         static void Main(string[] args)
@@ -54,7 +53,6 @@ namespace BasisProgrammering___Projekt_uge
                 //ask player for input again if the previous input was not allowed
             } while (isAllowedInput);
         }
-
 
         /// <summary>
         /// MineSweeper 
@@ -107,16 +105,27 @@ namespace BasisProgrammering___Projekt_uge
         /// </summary>
         static void StartScreen()
         {
-            Console.WriteLine("MineSweeper");
+            Console.WriteLine("\t\tMineSweeper");
+
+            Console.WriteLine("______________________________________________________________________");
 
             // how are bombs visualized 
-            Console.WriteLine("\nThe bombs are shown as: #\n");
+            Console.WriteLine("How the game is visualized: ");
+            Console.WriteLine("\tBombs: \t\t\tX");
+            Console.WriteLine("\tMarked positions: \tM");
+            Console.WriteLine("\tCovered positions: \t-");
+            Console.WriteLine("\tUncovered postions: \t0 to 8");
 
             // rules 
             Console.WriteLine("______________________________________________________________________");
-            Console.WriteLine("Rules:");
-            Console.WriteLine("Bombs: \n\tFind the bombs. \n\tBombs can not be marked.");
-            Console.WriteLine("Controls: \n\tUse keyboard. \n\tEnter horizontal index first. (will be promted) \n\tEnter vertical index second. (will be promted) ");
+            Console.WriteLine("How to play:");
+            Console.WriteLine("\tUse keyboard.");
+            Console.WriteLine("\tMark or Uncover position.");
+
+            Console.WriteLine("\n\tMark: \n\t\tPress:m \n\t\tSelect horizontal position. \n\t\tSelect vertical position. \n\t\tPosition will be marked with an M.");
+
+            Console.WriteLine("\n\tUncover: \n\t\tPress: u \n\t\tSelect horizontal position. \n\t\tSelect vertical position. \n\t\tPosition will be uncovered.");
+
             Console.WriteLine("______________________________________________________________________");
 
             Console.WriteLine("\nPlay game: \n\tPress ENTER ");
@@ -131,7 +140,8 @@ namespace BasisProgrammering___Projekt_uge
         static void InitializeBoard()
         {
             // promt player for board size 
-            Console.WriteLine("How big should the board be?");
+            // max is set to 78 to prevent call stack overflow 
+            Console.WriteLine("How big should the board be? \n\tMin: 1 \n\tMax: 78");
             // promt player for width input 
             Console.Write("Width: \t\t");
             string sWidth = ReadInputNumber();
@@ -173,25 +183,63 @@ namespace BasisProgrammering___Projekt_uge
             int posX;
             int posY;
 
-            // the remaining bombs that should be placed 
-            int remainingBombs = numberOfBombs;
-
-            // as long as there are still bombs to be placed, run the loop 
-            while (remainingBombs > 0)
+            // check if number of total bombs is less than half the board area 
+            if (numberOfBombs < (boardMS.GetLength(0) * boardMS.GetLength(1)) / 2)
             {
-                // get random x and y positions 
-                posX = random.Next(boardMS.GetLength(0) - 1);
-                posY = random.Next(boardMS.GetLength(1) - 1);
+                // the remaining bombs that should be placed 
+                int remainingBombs = numberOfBombs;
 
-                // check if the position on the board has a bomb 
-                if (boardMS[posX, posY] == 0)
+                // as long as there are still bombs to be placed, run the loop 
+                while (remainingBombs > 0)
                 {
-                    // set a bomb on the random position on the board 
-                    boardMS[posX, posY] = 35; // ascii: 35 = # 
+                    // get random x and y positions 
+                    posX = random.Next(boardMS.GetLength(0));
+                    posY = random.Next(boardMS.GetLength(1));
 
-                    // decrease amount of bombs remaining 
-                    remainingBombs--;
+                    // check if the position on the board has a bomb 
+                    if (boardMS[posX, posY] == 0)
+                    {
+                        // set a bomb on the random position on the board 
+                        boardMS[posX, posY] = -1; // bombs are set as -1
+
+                        // decrease amount of bombs remaining 
+                        remainingBombs--;
+                    }
                 }
+            }
+            else
+            {
+                // if there are less white space than bombs in total 
+                // set all positions on the board to be bombs 
+                for (int i = 0; i < boardMS.GetLength(0); i++)
+                {
+                    for (int j = 0; j < boardMS.GetLength(1); j++)
+                    {
+                        boardMS[i, j] = -1; // bombs are set as -1
+                    }
+                }
+
+                // then place white spaces 
+                // the remaining white space 
+                int remainingPositions = boardMS.GetLength(0) * boardMS.GetLength(1) - numberOfBombs;
+
+                while (remainingPositions > 0)
+                {
+                    // get random x and y positions 
+                    posX = random.Next(boardMS.GetLength(0));
+                    posY = random.Next(boardMS.GetLength(1));
+
+                    // check if the position on the board has a bomb 
+                    if (boardMS[posX, posY] != 0)
+                    {
+                        // remove bomb on the random position on the board 
+                        boardMS[posX, posY] = 0;
+
+                        // decrease amount remaining 
+                        remainingPositions--;
+                    }
+                }
+
             }
         }
 
@@ -207,7 +255,7 @@ namespace BasisProgrammering___Projekt_uge
                 for (int i = 0; i < boardMS.GetLength(0); i++)
                 {
                     // check if position has a bomb 
-                    if (boardMS[i, j] == 35)
+                    if (boardMS[i, j] == -1)
                     {
                         // find the neighbours of the bomb 
                         int[,] neighbours = GetNeighboursOfPoint(i, j);
@@ -220,7 +268,7 @@ namespace BasisProgrammering___Projekt_uge
                             int y = neighbours[k, 1];
 
                             // check if neighbour is a bomb 
-                            if (boardMS[x, y] != 35)
+                            if (boardMS[x, y] != -1)
                             {
                                 // count bomb for neighbour 
                                 boardMS[x, y]++;
@@ -237,17 +285,8 @@ namespace BasisProgrammering___Projekt_uge
         /// </summary>
         static void GameLoop()
         {
-            // multidimentional array of booleans, that shows positions on the board that are uncovered 
-            isRevealedBoardMS = new bool[boardMS.GetLength(0), boardMS.GetLength(1)];
-            for (int j = 0; j < isRevealedBoardMS.GetLength(1); j++)
-            {
-                for (int i = 0; i < isRevealedBoardMS.GetLength(0); i++)
-                {
-                    isRevealedBoardMS[i, j] = false;
-                }
-            }
-            // set the number of uncovered positions to the total 
-            numberOfUncoveredPositions = isRevealedBoardMS.GetLength(0) * isRevealedBoardMS.GetLength(1);
+            // setup the board 
+            BoardSetup();
 
             // as long as the player is alive, run the loop 
             bool isAlive = true;
@@ -257,32 +296,93 @@ namespace BasisProgrammering___Projekt_uge
                 // draw the board 
                 DrawBoard();
 
-                Console.WriteLine("______________________________________________________________________");
-                // uncover the board 
-                isAlive = Uncover();
+                // uncover or mark 
+                Console.WriteLine("Do you wish to uncover or mark a position? \n\tMark: \tm \n\tUncover: u");
+                char sChoice = ReadInputForChoice();
+
+                if (sChoice == 'm')
+                {
+                    Mark();
+                }
+                else if (sChoice == 'u')
+                {
+                    // uncover the board 
+                    isAlive = Uncover();
+                }
 
                 // when player hit a bomb 
                 if (!isAlive)
                 {
                     Console.Clear();
-                    Console.WriteLine("Oh no! You hit a bomb");
+
+                    // display text in color 
+                    Console.BackgroundColor = ConsoleColor.Red;
+                    Console.ForegroundColor = ConsoleColor.Black;
+                    Console.WriteLine("Oh no! You hit a bomb. ");
+                    Console.ResetColor();
 
                     // draw the revealed board 
                     DrawBoard();
                     break;
                 }
 
-                // player wins when the number of undcovered positions is equal to the total number of bombs 
-                if (numberOfUncoveredPositions == numberOfBombs)
+                // player wins when the number of covered positions and marked positions is equal to the total number of positions 
+                if ((numberOfCoveredPositions + numberOfMarkedPositions) == (boardMS.GetLength(0) * boardMS.GetLength(1)))
                 {
-                    Console.Clear();
-                    Console.WriteLine("Player won!");
+                    // check if marked areas are bombs 
+                    if (IsMarkedBombs())
+                    {
+                        Console.Clear();
 
-                    // draw the revealed board 
-                    DrawBoard();
-                    break;
+                        // display text in color 
+                        Console.BackgroundColor = ConsoleColor.Green;
+                        Console.ForegroundColor = ConsoleColor.Black;
+                        Console.WriteLine("You won!");
+                        Console.ResetColor();
+
+                        // draw the revealed board 
+                        DrawBoard();
+                        break;
+                    }
+                    else
+                    {
+                        // there are positions marked that are not bombs 
+                        Console.WriteLine("Some of the marked positions are not bombs.");
+                        Console.ReadLine();
+                    }
                 }
             }
+        }
+
+        /// <summary>
+        /// MineSweeper 
+        /// function that sets up isRevealedBoardMS and isMarkedAsBomb arrays 
+        /// </summary>
+        static void BoardSetup()
+        {
+            // multidimentional array of booleans, that shows positions on the board that are uncovered 
+            isRevealedBoardMS = new bool[boardMS.GetLength(0), boardMS.GetLength(1)];
+            for (int j = 0; j < isRevealedBoardMS.GetLength(1); j++)
+            {
+                for (int i = 0; i < isRevealedBoardMS.GetLength(0); i++)
+                {
+                    isRevealedBoardMS[i, j] = false;
+                }
+            }
+            // set the number of covered positions 
+            numberOfCoveredPositions = 0;
+
+            // multidimentional array of booleans, that shows positions on the board that are marked
+            isMarkedAsBomb = new bool[boardMS.GetLength(0), boardMS.GetLength(1)];
+            for (int j = 0; j < isMarkedAsBomb.GetLength(1); j++)
+            {
+                for (int i = 0; i < isMarkedAsBomb.GetLength(0); i++)
+                {
+                    isMarkedAsBomb[i, j] = false;
+                }
+            }
+            // set the number of marked positions
+            numberOfMarkedPositions = 0;
         }
 
         /// <summary>
@@ -291,6 +391,10 @@ namespace BasisProgrammering___Projekt_uge
         /// </summary>
         static void DrawBoard()
         {
+            // display number of bombs left on the board 
+            Console.WriteLine("Number of bombs left: " + (numberOfBombs - numberOfMarkedPositions));
+            Console.WriteLine("______________________________________________________________________");
+
             // writing the horizontal positions at the top 
             char[] chars = new char[26] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
             Console.Write(" \t");
@@ -325,17 +429,22 @@ namespace BasisProgrammering___Projekt_uge
                     // check if uncovered 
                     if (isRevealedBoardMS[i, j])
                     {
+
                         // check if position on the board has a bomb 
-                        if (boardMS[i, j] == 35)
+                        if (boardMS[i, j] == -1)
                         {
-                            // write the bomb as ascii format: 35=# 
-                            Console.Write(Convert.ToChar(35) + " ");
+                            // write the bomb as X
+                            Console.Write("X ");
                         }
                         else
                         {
                             // write the number of bombs at the position of the board 
                             Console.Write(boardMS[i, j] + " ");
                         }
+                    }
+                    else if (isMarkedAsBomb[i, j])
+                    {
+                        Console.Write("M ");
                     }
                     else
                     {
@@ -344,6 +453,48 @@ namespace BasisProgrammering___Projekt_uge
                     }
                 }
                 Console.WriteLine();
+            }
+            Console.WriteLine("______________________________________________________________________");
+        }
+
+        /// <summary>
+        /// MineSweeper 
+        /// function that marks positions 
+        /// </summary>
+        static void Mark()
+        {
+            // promt player to uncover at position 
+            Console.WriteLine("Mark at position: ");
+            // promt player for horizontal position input 
+            Console.Write("Horizontal: \t");
+            string sHorizontal = ReadInputForHorizontal();
+            // promt player for vertical position input 
+            Console.Write("Vertical: \t");
+            string sVertical = ReadInputForVertical();
+
+            // set the positions 
+            // convert characters in string to int 
+            int posX = Convert.ToInt32(sHorizontal[0]) - 97 + (Convert.ToInt32(sHorizontal[1]) - 48) * 26;
+            int posY = Convert.ToInt32(sVertical) - 1;
+
+            // check if uncovered 
+            if (!isRevealedBoardMS[posX, posY])
+            {
+                // check if already marked
+                if (isMarkedAsBomb[posX, posY])
+                {
+                    // unmark position 
+                    isMarkedAsBomb[posX, posY] = false;
+                    // decrement the number of marked positions 
+                    numberOfMarkedPositions--;
+                }
+                else
+                {
+                    // mark position 
+                    isMarkedAsBomb[posX, posY] = true;
+                    // increment the number of marked positions 
+                    numberOfMarkedPositions++;
+                }
             }
         }
 
@@ -369,7 +520,7 @@ namespace BasisProgrammering___Projekt_uge
             int posY = Convert.ToInt32(sVertical) - 1;
 
             // check if position on board has a bomb 
-            if (boardMS[posX, posY] == 35)
+            if (boardMS[posX, posY] == -1)
             {
                 // if player hits a bomb, reveal the entire board 
                 // update the boardShow to reveal the board 
@@ -380,19 +531,24 @@ namespace BasisProgrammering___Projekt_uge
                         // set position to true, hence uncovered 
                         isRevealedBoardMS[i, j] = true;
 
-                        // count down uncovered positions 
-                        numberOfUncoveredPositions--;
+                        // increment the number of covered positions 
+                        numberOfCoveredPositions++;
                     }
                 }
 
                 // return that the player is dead 
                 return false;
             }
-            else
+            else if (!isRevealedBoardMS[posX, posY])
             {
                 // uncover recursively using neighbours 
                 UncoverNext(posX, posY);
 
+                // return that the game should go on 
+                return true;
+            }
+            else
+            {
                 // return that the game should go on 
                 return true;
             }
@@ -406,11 +562,18 @@ namespace BasisProgrammering___Projekt_uge
         /// <param name="posY">the y position to check neighbours from</param>
         static void UncoverNext(int posX, int posY)
         {
+            // check if marked 
+            if (isMarkedAsBomb[posX, posY])
+            {
+                isMarkedAsBomb[posX, posY] = false;
+                numberOfMarkedPositions--;
+            }
+
             // set this position to be uncovered 
             isRevealedBoardMS[posX, posY] = true;
 
-            // count down uncovered positions 
-            numberOfUncoveredPositions--;
+            // increment the number of covered positions 
+            numberOfCoveredPositions++;
 
             // check if this position on the board is a zero 
             if (boardMS[posX, posY] == 0)
@@ -426,7 +589,7 @@ namespace BasisProgrammering___Projekt_uge
                     int y = neighbours[i, 1];
 
                     // check if neighbour is a bomb, and if neighbour is shown
-                    if (boardMS[x, y] != 35 && !isRevealedBoardMS[x, y])
+                    if (boardMS[x, y] != -1 && !isRevealedBoardMS[x, y])
                     {
                         // set neighbour to be shown
                         isRevealedBoardMS[x, y] = true;
@@ -515,6 +678,30 @@ namespace BasisProgrammering___Projekt_uge
         }
 
         /// <summary>
+        /// MineSweeper 
+        /// function that check if marked positions are bombs 
+        /// </summary>
+        /// <returns>returns a boolean, true if all maked positions are bombs</returns>
+        static bool IsMarkedBombs()
+        {
+            for (int i = 0; i < isMarkedAsBomb.GetLength(0); i++)
+            {
+                for (int j = 0; j < isMarkedAsBomb.GetLength(1); j++)
+                {
+                    // check if marked is a bomb
+                    if (isMarkedAsBomb[i, j] && boardMS[i, j] != -1)
+                    {
+                        // return false, if marked is not a bomb 
+                        return false;
+                    }
+                }
+            }
+
+            // return true, if marked were all bombs 
+            return true;
+        }
+
+        /// <summary>
         /// MineSweeper
         /// function that ensures valid number input from the player 
         /// </summary>
@@ -533,16 +720,27 @@ namespace BasisProgrammering___Projekt_uge
             }
             else
             {
-                // check if input is greater than zero 
-                if (Convert.ToInt32(input) < 0)
+                // test input with try parse 
+                int i;
+                if (int.TryParse(input, out i))
                 {
-                    Console.WriteLine("Please enter non-negative input.");
+                    // check if input is inside bounds of screen
+                    if (Convert.ToInt32(input) < 1 || Convert.ToInt32(input) > 78)
+                    {
+                        Console.WriteLine("Please enter input that can fit in the screen.");
+                        // call function again 
+                        return ReadInputNumber();
+                    }
+
+                    // return valid input 
+                    return input;
+                }
+                else
+                {
+                    Console.WriteLine("Please enter a valid integer");
                     // call function again 
                     return ReadInputNumber();
                 }
-
-                // return valid input 
-                return input;
             }
         }
 
@@ -565,15 +763,27 @@ namespace BasisProgrammering___Projekt_uge
             }
             else
             {
-                if (Convert.ToInt32(input) < 0 || Convert.ToInt32(input) > boardMS.GetLength(0) * boardMS.GetLength(1))
+                // test input with try parse 
+                int i;
+                if (int.TryParse(input, out i))
                 {
-                    Console.WriteLine("Please enter an amount of bombs a specified.");
+                    // check if input is inside the specified constraints 
+                    if (Convert.ToInt32(input) < 0 || Convert.ToInt32(input) > boardMS.GetLength(0) * boardMS.GetLength(1))
+                    {
+                        Console.WriteLine("Please enter an amount of bombs a specified.");
+                        // call function again 
+                        return ReadInputNumberBombs();
+                    }
+
+                    // return valid input 
+                    return input;
+                }
+                else
+                {
+                    Console.WriteLine("Please enter a valid integer");
                     // call function again 
                     return ReadInputNumberBombs();
                 }
-
-                // return valid input 
-                return input;
             }
         }
 
@@ -631,17 +841,64 @@ namespace BasisProgrammering___Projekt_uge
             }
             else
             {
-                // check if inside the bounds of the board 
-                int posY = Convert.ToInt32(input) - 1;
-                if (posY < 0 || posY > boardMS.GetLength(1) - 1)
+                // test with try parse 
+                int i;
+                if (int.TryParse(input, out i))
                 {
-                    Console.WriteLine("Please enter a position inside the board.");
+                    // check if inside the bounds of the board 
+                    int posY = Convert.ToInt32(input) - 1;
+                    if (posY < 0 || posY > boardMS.GetLength(1) - 1)
+                    {
+                        Console.WriteLine("Please enter a position inside the board.");
+                        // call function again 
+                        return ReadInputForVertical();
+                    }
+
+                    // return valid input 
+                    return input;
+                }
+                else
+                {
+                    Console.WriteLine("Please enter valid integer.");
                     // call function again 
                     return ReadInputForVertical();
                 }
 
-                // return valid input 
-                return input;
+            }
+        }
+
+        /// <summary>
+        /// MineSweeper 
+        /// function that ensures valid input for choice of marking or uncovering 
+        /// </summary>
+        /// <returns>return valid input</returns>
+        static char ReadInputForChoice()
+        {
+            // get player input 
+            char input = Console.ReadKey().KeyChar;
+            Console.ReadLine();
+
+            // check if input is empty, and is valid 
+            if (input.Equals(' '))
+            {
+                Console.WriteLine("Please enter valid input.");
+                // call function again 
+                return ReadInputForChoice();
+            }
+            else
+            {
+                // check if input is allowed 
+                if (input.Equals('m') || input.Equals('u'))
+                {
+                    // return valid input 
+                    return input;
+                }
+                else
+                {
+                    Console.WriteLine("Please enter one of the options.");
+                    // call function again 
+                    return ReadInputForChoice();
+                }
             }
         }
     }
