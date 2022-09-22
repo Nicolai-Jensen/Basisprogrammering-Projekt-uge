@@ -296,6 +296,16 @@ namespace BasisProgrammering___Projekt_uge
                 // draw the board 
                 DrawBoard();
 
+                // check if board if full, and marked positions are not bombs 
+                if(!IsMarkedBombs() && (numberOfCoveredPositions + numberOfMarkedPositions) == (boardMS.GetLength(0) * boardMS.GetLength(1)))
+                {
+                    Console.BackgroundColor = ConsoleColor.DarkBlue;
+                    //Console.ForegroundColor = ConsoleColor.Black;
+                    // there are positions marked that are not bombs 
+                    Console.WriteLine("Some of the marked positions are not bombs.");
+                    Console.ResetColor();
+                }
+
                 // uncover or mark 
                 Console.WriteLine("Do you wish to uncover or mark a position? \n\tMark: \tm \n\tUncover: u");
                 char sChoice = ReadInputForChoice();
@@ -343,12 +353,6 @@ namespace BasisProgrammering___Projekt_uge
                         // draw the revealed board 
                         DrawBoard();
                         break;
-                    }
-                    else
-                    {
-                        // there are positions marked that are not bombs 
-                        Console.WriteLine("Some of the marked positions are not bombs.");
-                        Console.ReadLine();
                     }
                 }
             }
