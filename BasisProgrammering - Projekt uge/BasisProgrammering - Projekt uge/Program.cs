@@ -7,6 +7,9 @@ namespace BasisProgrammering___Projekt_uge
     enum Ship { Water, Ship }
     enum shots { O, M, H }
 
+    //names of pieces and the empty board spaces
+    enum Piece { O, K, T, R, Q, H, P }
+
     internal class Program
     {
         // field variables for MineSweeper 
@@ -50,6 +53,8 @@ namespace BasisProgrammering___Projekt_uge
                 else if (c == '3')
                 {
                     Console.Clear();
+                    Board();
+                    Console.Clear(); 
                 }
                 else if (c == 'e')
                 {
@@ -302,7 +307,7 @@ namespace BasisProgrammering___Projekt_uge
                 DrawBoard();
 
                 // check if board if full, and marked positions are not bombs 
-                if(!IsMarkedBombs() && (numberOfCoveredPositions + numberOfMarkedPositions) == (boardMS.GetLength(0) * boardMS.GetLength(1)))
+                if (!IsMarkedBombs() && (numberOfCoveredPositions + numberOfMarkedPositions) == (boardMS.GetLength(0) * boardMS.GetLength(1)))
                 {
                     Console.BackgroundColor = ConsoleColor.DarkBlue;
                     //Console.ForegroundColor = ConsoleColor.Black;
@@ -2343,6 +2348,55 @@ namespace BasisProgrammering___Projekt_uge
                 }
             }
 
+        }
+
+        static void Board()
+        {
+            Piece[,] board = new Piece[8, 8];
+            board[0, 0] = Piece.R;
+            board[0, 1] = Piece.H;
+            board[0, 2] = Piece.T;
+            board[0, 3] = Piece.Q;
+            board[0, 4] = Piece.K;
+            board[0, 5] = Piece.T;
+            board[0, 6] = Piece.H;
+            board[0, 7] = Piece.R;
+            board[1, 0] = Piece.P;
+            board[1, 1] = Piece.P;
+            board[1, 2] = Piece.P;
+            board[1, 3] = Piece.P;
+            board[1, 4] = Piece.P;
+            board[1, 5] = Piece.P;
+            board[1, 6] = Piece.P;
+            board[1, 7] = Piece.P;
+            board[7, 0] = Piece.R;
+            board[7, 1] = Piece.K;
+            board[7, 2] = Piece.T;
+            board[7, 3] = Piece.Q;
+            board[7, 4] = Piece.K;
+            board[7, 5] = Piece.T;
+            board[7, 6] = Piece.H;
+            board[7, 7] = Piece.R;
+            board[6, 0] = Piece.P;
+            board[6, 1] = Piece.P;
+            board[6, 2] = Piece.P;
+            board[6, 3] = Piece.P;
+            board[6, 4] = Piece.P;
+            board[6, 5] = Piece.P;
+            board[6, 6] = Piece.P;
+            board[6, 7] = Piece.P;
+
+            //print board to console
+
+            for (int x = 0; x < board.GetLength(0); x++)
+            {
+                for (int y = 0; y < board.GetLength(1); y++)
+                {
+                    Console.Write(board[x, y] + "  ");
+                }
+                Console.WriteLine();
+            }
+            Console.ReadLine();
         }
     }
 }
